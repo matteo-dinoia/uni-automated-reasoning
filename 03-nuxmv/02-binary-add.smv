@@ -1,0 +1,44 @@
+MODULE bit-adder(a, b, cin)
+DEFINE
+    sum := (a xor b) xor cin;
+    cout := (a & b) | (cin & (a xor b));
+
+
+
+MODULE adder(a, b)
+VAR
+    adder[0] : bit-adder(a[0], b[0], FALSE);
+    adder[1] : bit-adder(a[1], b[1], adder[0].cout);
+    adder[2] : bit-adder(a[2], b[2], adder[1].cout);
+    adder[3] : bit-adder(a[3], b[3], adder[2].cout);
+    sum      : array 0..3 of boolean;
+    overflow : boolean;
+ASSIGN
+    next(sum[0])        := adder[0].sum;
+    next(sum[1])        := adder[1].sum;
+    next(sum[2])        := adder[2].sum;
+    next(sum[3])        := adder[3].sum;
+    next(overflow)      := adder[3].cout;
+
+MODULE frombin(bin)
+DEFINE
+    out := toint(bin[0]) +
+        toint(bin[1]) * 2 +
+        toint(bin[2]) * 4 +
+        toint(bin[3]) *8;
+
+MODULE main
+VAR
+    a : array 0..3 of boolean;
+    b : array 0..3 of boolean;
+    full-adder: adder(a, b);
+    op1v : frombin(a);
+    op2v : frombin(b);
+DEFINE
+    op1 := op1v.out;
+    op2 := op2v.out;
+    out := frombin(full-adder.sum) +
+        toint(full-adder.overflow) * 16;
+ASSIGN
+    next(a) := a;
+    next(b) := b;

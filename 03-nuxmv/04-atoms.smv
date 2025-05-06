@@ -1,0 +1,51 @@
+MODULE main
+VAR
+    c   : 0..6;
+    o   : 0..6;
+    o2  : 0..6;
+    co  : 0..6;
+    co2 : 0..6;
+    reaction : {r1, r2, r3, r4, none};
+
+ASSIGN
+    init(o2) := 0;
+    init(co) := 0;
+    init(co2) := 0;
+
+
+    next(o):= case
+        reaction = r1 & o >= 2 : o - 2;
+        reaction = r2 & o >= 1 : o - 1;
+        TRUE                   : o;
+    esac;
+    next(c):= case
+        (reaction = r2 | reaction = r4) & c >= 1 : c - 1;
+        reaction = r3 & c >= 2                   : c - 2;
+        TRUE                                     : c;
+    esac;
+
+
+    next(co):= case
+        reaction = r2 & co < 6      : co + 1;
+        reaction = r3 & co + 1 < 6  : co + 2;
+        TRUE                        : co;
+    esac;
+
+    next(co2):= case
+        reaction = r3 & co2 + 1 <= 6 : co2 + 1;
+        TRUE                         : co2;
+    esac;
+
+    next(o2):= case
+        reaction = r1 & o2 + 1 <= 6               : o2 + 1;
+        (reaction = r3 | reaction = r4) & o2 >= 1 : o2 - 1;
+        TRUE                                      : o2;
+    esac;
+
+
+TRANS (o < 2)          -> reaction != r1;
+TRANS (c < 1 | o < 1)  -> reaction != r2;
+TRANS (c < 2 | o2 < 1) -> reaction != r3;
+TRANS (c < 1 | o2 < 1) -> reaction != r4;
+
+CTLSPEC EF co2 = 3;

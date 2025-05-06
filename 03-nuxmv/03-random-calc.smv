@@ -1,0 +1,31 @@
+MODULE main
+VAR
+    n1: 1..10;
+    n2: 1..10;
+    n3: 1..10;
+    o12: -10..100;
+    o13: -10..100;
+    o23: -10..100;
+    index: 0..3;
+INIT
+    o12 = -1 &
+    o13 = -1 &
+    o23 = -1 &
+    index = 1
+ASSIGN
+    next(index) := case
+            index = 0 | index = 3 : 0;
+            TRUE : index + 1;
+        esac;
+
+    next(n1) := n1;
+    next(n2) := n2;
+    next(n3) := n3;
+
+TRANS
+    case
+        index = 1 : (next(o12) = n1 + n2 | next(o12) = n1 * n2 | next(o12) = n1 - n2) & next(o13) = o13 & next(o23) = o23;
+        index = 2 : (next(o13) = n1 + n3 | next(o13) = n1 * n3 | next(o12) = n1 - n3) & next(o12) = o12 & next(o23) = o23;
+        index = 3 : (next(o23) = n2 + n3 | next(o23) = n2 * n3 | next(o23) = n2 - n3) & next(o13) = o13 & next(o12) = o12;
+        TRUE : next(o12) = o12 & next(o13) = o13 & next(o23) = o23;
+    esac;
