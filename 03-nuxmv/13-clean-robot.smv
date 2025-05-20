@@ -1,0 +1,43 @@
+MODULE main
+VAR
+    x: 0..9;
+    y: 0..9;
+    state : {CHECK, MOVE, CLEAN, CHARGE, OFF};
+    budget : 0..100;
+DEFINE
+    pos := y * 10 + x;
+ASSIGN
+    init(x) := 0;
+    init(y) := 0;
+    init(state) := CHECK;
+
+
+    -- discharging
+    next(budget) := case
+        state in {MOVE, CLEAN} & budget > 0  : budget - 1;
+        state = CHARGE                       : 100;
+        TRUE                                 : budget;
+    esac;
+
+    next(state) := case
+        pos = 0 & budget < 100          : CHARGE;
+        budget = 0                      : OFF;
+        state in {MOVE, CHARGE}         : CHECK;
+        state = CHECK                   : {MOVE, CLEAN};
+        TRUE                            : MOVE;
+    esac;
+
+TRANS -- move only when in move state
+    state != MOVE -> next(pos) = pos;
+TRANS
+    state = MOVE -> (
+        (next(x) in {x + 1, x - 1} & next(y) = y) |
+        (next(y) in {y + 1, y - 1} & next(x) = x)
+    );
+
+LTLSPEC G F (next(pos) != pos);
+LTLSPEC ! F (state in {MOVE, CLEAN} & budget = 0)
+LTLSPEC G F (state = CHARGE) -> G F (next(pos) != pos);
+INVARSPEC !(
+    next(x) in {x + 1, x - 1} & next(y) in {y + 1, y - 1}
+);

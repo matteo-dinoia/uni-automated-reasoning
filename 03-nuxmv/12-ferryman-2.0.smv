@@ -1,0 +1,41 @@
+MODULE main
+VAR
+    cabbage : {left, right};
+    caterpillar: {left, right};
+    chicken:   {left, right};
+    foxy:    {left, right};
+    man:     {left, right};
+    move1:    {cab, cat, chi, fox, none};
+    move2:    {cab, cat, chi, fox, none};
+
+INIT
+    caterpillar = right & chicken = right & foxy = right & man = right ;
+
+INVAR -- can carry only on its side
+    ((move1 = cab | move2 = cab) -> man = cabbage) &
+    ((move1 = cat | move2 = cat) -> man = caterpillar) &
+    ((move1 = chi | move2 = chi) -> man = chicken) &
+    ((move1 = fox | move2 = fox) -> man = foxy) &
+    (move1 != none               -> move2 != move1);
+
+TRANS
+    next(man) != man &
+    ((move1 = cab | move2 = cab) <-> next(cabbage) != cabbage) &
+    ((move1 = cat | move2 = cat) <-> next(caterpillar) != caterpillar) &
+    ((move1 = chi | move2 = chi) <-> next(chicken) != chicken) &
+    ((move1 = fox | move2 = fox) <-> next(foxy) != foxy);
+
+DEFINE
+    safe := (chicken in {foxy, caterpillar} -> chicken = man) &
+            (cabbage = caterpillar          -> caterpillar = man);
+    goal := foxy = left & chicken = left & caterpillar = left & cabbage = left & man = left;
+--INVAR
+--    safe;
+--INVAR --next safe based on move (no deadlock)
+--    (cabbage = caterpillar -> cab in {move1, move2} | cat in {move1, move2}) &
+--    (caterpillar = chicken -> cat in {move1, move2} | chi in {move1, move2}) &
+--    (chicken = cabbage     -> chi in {move1, move2} | cab in {move1, move2}) &
+--    (foxy = chicken        -> fox in {move1, move2} | chi in {move1, move2});
+
+
+LTLSPEC !(safe U goal);

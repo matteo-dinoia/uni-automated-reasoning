@@ -1,0 +1,67 @@
+MODULE main
+VAR
+    vis : array 0..3 of array 0..3 of boolean;
+    x: 0..3;
+    y: 0..3;
+    curr_max: 1..5;
+INIT
+    vis[0][0] = FALSE & vis[0][1] = FALSE & vis[0][2] = FALSE & vis[0][3] = FALSE &
+    vis[1][0] = FALSE & vis[1][1] = FALSE & vis[1][2] = FALSE & vis[1][3] = FALSE &
+    vis[2][0] = FALSE & vis[2][1] = FALSE & vis[2][2] = FALSE & vis[2][3] = FALSE &
+    vis[3][0] = FALSE & vis[3][1] = FALSE & vis[3][2] = FALSE & vis[3][3] = FALSE &
+    x = 1 & y = 1 & curr_max = 1;
+DEFINE
+    filled := vis[0][0] = TRUE & vis[0][1] = TRUE & vis[0][2] = TRUE & vis[0][3] = TRUE &
+    vis[1][0] = TRUE & vis[1][1] = TRUE & vis[1][2] = TRUE & vis[1][3] = TRUE &
+    vis[2][0] = TRUE & vis[2][1] = TRUE & vis[2][2] = TRUE & vis[2][3] = TRUE &
+    vis[3][0] = TRUE & vis[3][1] = TRUE & vis[3][2] = TRUE & vis[3][3] = TRUE;
+TRANS
+    (next(y = 3 & x = 0) -> (curr_max = 1 & next(curr_max) = curr_max + 1)) &
+    (next(y = 3 & x = 3) -> (curr_max = 2 & next(curr_max) = curr_max + 1)) &
+    (next(y = 0 & x = 2) -> (curr_max = 3 & next(curr_max) = curr_max + 1)) &
+    (next(y = 0 & x = 3) -> (curr_max = 4 & next(curr_max) = curr_max + 1)) &
+    (!next(y = 3 & x = 0) & !next(y = 3 & x = 3) & !next(y = 0 & x = 2)
+    & !next(y = 0 & x = 3) -> curr_max = next(curr_max));
+
+DEFINE
+    can_move_u := y > 0 & !vis[y - 1][x];
+    can_move_d := y < 3 & !vis[y + 1][x];
+    can_move_l := x > 0 & !vis[y][x - 1];
+    can_move_r := x < 3 & !vis[y][x + 1];
+ASSIGN
+    next(y) := {y, y < 3 ? y + 1 : y, y > 0 ? y - 1 : y};
+    next(x) := {x, x < 3 ? x + 1 : x, x > 0 ? x - 1 : x};
+TRANS
+    next(y) = y | next(x) = x;
+TRANS
+    next(y) = y - 1 -> can_move_u &
+    next(y) = y + 1 -> can_move_d &
+    next(x) = x - 1 -> can_move_l &
+    next(x) = x + 1 -> can_move_r;
+TRANS
+    (next(x) = x & next(y) = y) -> !(can_move_d | can_move_u | can_move_l | can_move_r)
+
+ASSIGN
+    next(vis[0][0]) := (y = 0 & x = 0) ? TRUE : vis[0][0];
+    next(vis[0][1]) := (y = 0 & x = 1) ? TRUE : vis[0][1];
+    next(vis[0][2]) := (y = 0 & x = 2) ? TRUE : vis[0][2];
+    next(vis[0][3]) := (y = 0 & x = 3) ? TRUE : vis[0][3];
+
+    next(vis[1][0]) := (y = 1 & x = 0) ? TRUE : vis[1][0];
+    next(vis[1][1]) := (y = 1 & x = 1) ? TRUE : vis[1][1];
+    next(vis[1][2]) := (y = 1 & x = 2) ? TRUE : vis[1][2];
+    next(vis[1][3]) := (y = 1 & x = 3) ? TRUE : vis[1][3];
+
+    next(vis[2][0]) := (y = 2 & x = 0) ? TRUE : vis[2][0];
+    next(vis[2][1]) := (y = 2 & x = 1) ? TRUE : vis[2][1];
+    next(vis[2][2]) := (y = 2 & x = 2) ? TRUE : vis[2][2];
+    next(vis[2][3]) := (y = 2 & x = 3) ? TRUE : vis[2][3];
+
+    next(vis[3][0]) := (y = 3 & x = 0) ? TRUE : vis[3][0];
+    next(vis[3][1]) := (y = 3 & x = 1) ? TRUE : vis[3][1];
+    next(vis[3][2]) := (y = 3 & x = 2) ? TRUE : vis[3][2];
+    next(vis[3][3]) := (y = 3 & x = 3) ? TRUE : vis[3][3];
+
+
+LTLSPEC
+    ! F(curr_max = 5 & filled);

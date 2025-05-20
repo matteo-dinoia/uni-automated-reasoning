@@ -1,0 +1,45 @@
+MODULE main
+VAR
+    grid: array 1..9 of {x, o, empty};
+    player: {x, o}; --currently moving
+    move: 0..9;
+INIT
+    grid[1] = empty & grid[2] = empty & grid[3] = empty &
+    grid[4] = empty & grid[5] = empty & grid[6] = empty &
+    grid[7] = empty & grid[8] = empty & grid[9] = empty &
+    player = x;
+INVAR
+    (move != 0 -> grid[move] = empty);
+ASSIGN -- creation of move
+    next(grid[1]) := move = 1 ? player : grid[1];
+    next(grid[2]) := move = 2 ? player : grid[2];
+    next(grid[3]) := move = 3 ? player : grid[3];
+    next(grid[4]) := move = 4 ? player : grid[4];
+    next(grid[5]) := move = 5 ? player : grid[5];
+    next(grid[6]) := move = 6 ? player : grid[6];
+    next(grid[7]) := move = 7 ? player : grid[7];
+    next(grid[8]) := move = 8 ? player : grid[8];
+    next(grid[9]) := move = 9 ? player : grid[9];
+TRANS --change player
+    next(player) != player;
+DEFINE
+    winX := (grid[1]=x & grid[2]=x & grid[3]=x) | (grid[4]=x & grid[5]=x & grid[6]=x) |
+        (grid[7]=x & grid[8]=x & grid[9]=x) | (grid[1]=x & grid[4]=x & grid[7]=x) |
+        (grid[2]=x & grid[5]=x & grid[8]=x) | (grid[3]=x & grid[6]=x & grid[9]=x) |
+        (grid[1]=x & grid[5]=x & grid[9]=x) | (grid[3]=x & grid[5]=x & grid[7]=x);
+    winO := (grid[1]=o & grid[2]=o & grid[3]=o) | (grid[4]=o & grid[5]=o & grid[6]=o) |
+        (grid[7]=o & grid[8]=o & grid[9]=o) | (grid[1]=o & grid[4]=o & grid[7]=o) |
+        (grid[2]=o & grid[5]=o & grid[8]=o) | (grid[3]=o & grid[6]=o & grid[9]=o) |
+        (grid[1]=o & grid[5]=o & grid[9]=o) | (grid[3]=o & grid[5]=o & grid[7]=o);
+    draw := !winX & !winO &
+        !(grid[1]=empty | grid[2]=empty | grid[3]=empty | grid[4]=empty | grid[5]=empty |
+        grid[6]=empty | grid[7]=empty | grid[8]=empty | grid[9]=empty);
+INVAR
+    (winO | winX | draw) <-> move = 0;
+
+LTLSPEC
+    ! (F draw);
+LTLSPEC
+    ! (F winO);
+LTLSPEC
+    ! (F winX);

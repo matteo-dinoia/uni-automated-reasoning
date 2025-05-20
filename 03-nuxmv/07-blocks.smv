@@ -1,0 +1,56 @@
+MODULE block (id, ab, bl)
+VAR
+    above : {a, b, c, none};
+    below : {a, b, c, none};
+INIT
+    above = ab & below = bl;
+DEFINE
+    clear := (above = none);
+INVAR
+    below != id & above != id;
+
+
+MODULE main
+VAR
+    block_a : block(a, none, b);
+    block_b : block(b, a, c);
+    block_c : block(c, b, none);
+
+    move    : {a, b, c};
+INVAR -- picking moves
+    (move = a -> block_a.clear) &
+    (move = b -> block_b.clear) &
+    (move = c -> block_c.clear);
+INVAR -- symmetry
+    (block_a.above = b <-> block_b.below = a) &
+    (block_b.above = a <-> block_a.below = b) &
+    (block_a.above = c <-> block_c.below = a) &
+    (block_c.above = a <-> block_a.below = c) &
+    (block_c.above = b <-> block_b.below = c) &
+    (block_b.above = c <-> block_c.below = b);
+
+TRANS -- below change only if moving the block
+    (move = a <-> next(block_a.below) != block_a.below) &
+    (move = b <-> next(block_b.below) != block_b.below) &
+    (move = c <-> next(block_c.below) != block_c.below);
+TRANS -- the block above remain free if moving
+    (move = a -> next(block_a.clear)) &
+    (move = b -> next(block_b.clear)) &
+    (move = c -> next(block_c.clear));
+TRANS -- the block below is now free
+    (move = a -> (block_b.above = a -> next(block_b.clear)) &
+                    (block_c.above = a -> next(block_c.clear))) &
+    (move = b -> (block_a.above = b -> next(block_a.clear)) &
+                    (block_c.above = b -> next(block_c.clear))) &
+    (move = c -> (block_b.above = c -> next(block_b.clear)) &
+                    (block_a.above = c -> next(block_a.clear)));
+
+
+LTLSPEC
+    ! F (block_c.clear & block_b.above=c & block_a.above=b)
+LTLSPEC
+    ! F (block_a.clear & block_b.clear & block_c.clear)
+INVARSPEC
+    (block_a.below = none | block_b.below = none | block_c.below = none)
+INVARSPEC
+    (block_a.above = none | block_b.above = none | block_c.above = none)

@@ -1,0 +1,21 @@
+MODULE main
+VAR
+    cannibals_left: 0..3;
+    people_left: 0..3;
+    is_boat_left: boolean;
+INIT
+    cannibals_left = 3 & people_left = 3 & is_boat_left;
+DEFINE
+    diff_c:= (next(cannibals_left)) - (cannibals_left);
+    diff_p:= (next(people_left)) - (people_left);
+    diff:= (next(cannibals_left + people_left)) - (cannibals_left + people_left);
+TRANS
+    (is_boat_left -> (diff in {-2, -1} & diff_c in {-2, -1, 0} & diff_p in {-2, -1, 0})) &
+    ((!is_boat_left) -> (diff in {+2, +1} & diff_c in {+2, +1, 0} & diff_p in {+2, +1, 0}));
+TRANS
+    is_boat_left = !next(is_boat_left);
+INVAR
+    (people_left = 0 | people_left >= cannibals_left) &
+    ((3 - people_left) = 0 | (3 - people_left) >= (3 - cannibals_left))
+
+LTLSPEC ! F (cannibals_left = 0 & people_left = 0);

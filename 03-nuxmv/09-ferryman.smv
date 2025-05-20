@@ -1,0 +1,30 @@
+MODULE main
+VAR
+    cabbage: {left, right};
+    sheep:   {left, right};
+    wolf:    {left, right};
+    man:     {left, right};
+    move:    {c, s, w, none};
+
+INIT
+    cabbage = right & sheep = right & wolf = right & man = right;
+
+INVAR -- can carry only on its side
+    (move = c -> man = cabbage) &
+    (move = s -> man = sheep) &
+    (move = w -> man = wolf);
+
+TRANS
+    next(man) != man &
+    (move = c <-> next(cabbage) != cabbage) &
+    (move = w <-> next(wolf) != wolf) &
+    (move = s <-> next(sheep) != sheep);
+
+DEFINE
+    safe := (sheep in {wolf, cabbage} -> sheep = man);
+    goal := wolf = left & sheep = left & cabbage = left & man = left;
+INVAR
+    safe;
+
+
+LTLSPEC !(safe U goal);
