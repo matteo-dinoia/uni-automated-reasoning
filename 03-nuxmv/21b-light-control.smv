@@ -1,0 +1,27 @@
+@TIME_DOMAIN continuous
+MODULE main
+VAR
+    x: clock;
+    press: boolean;
+    state: {off, light, bright};
+INIT
+    state = off & x = 0 & press = FALSE;
+ASSIGN
+    next(state) := case
+        state = off    & press           : light;
+        state = light  & press & x <= 3  : bright;
+        state = light  & press & x >  3  : off;
+        state = bright & press           : off;
+        TRUE                             : state;
+    esac;
+
+    next(x) := case
+        state = off    & press           : 0;
+        TRUE                             : x;
+    esac;
+
+URGENT -- As soon as the button is pressed all the timed transitions are stopd
+  press;
+
+LTLSPEC G F press -> G F state = light;
+LTLSPEC G F[0,2] press -> G F state = bright;

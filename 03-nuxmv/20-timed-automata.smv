@@ -1,0 +1,23 @@
+@TIME_DOMAIN continuous
+
+MODULE main
+VAR
+    state: {l1, l2};
+    x: clock;
+INIT
+    state = l1 & x = 0;
+INVAR
+    (state = l1 -> x <= 2) &
+    (state = l2 -> x <= 3);
+TRANS
+    (next(state) = l2 & state = l1 -> (x >= 1 & next(x) = x)) &
+    (next(state) = l1 & state = l2 -> next(x) = 0) &
+    next(state) != state;
+
+LTLSPEC
+    G (state = l2 -> F[0,1] state = l1);
+LTLSPEC
+    G (state = l2 -> F[0,2] state = l1);
+
+LTLSPEC
+    ! F (state = l1 & x = 1);

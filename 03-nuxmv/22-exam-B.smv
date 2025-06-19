@@ -1,0 +1,40 @@
+MODULE main
+VAR
+    dice: 1..4;
+    turn: 1..5;
+    pos: 0..16;
+FROZENVAR
+    board : array 0..16 of {Start, Em, Sp, End};
+INIT
+    turn = 1 &
+    board[1] = Em & board[2] = Em & board[3] = Em & board[4] = Sp & board[5] = Sp &
+    board[6] = Em & board[7] = Em & board[8] = Sp & board[9] = Sp & board[10] = Em &
+    board[11] = Em & board[12] = Em & board[13] = Sp & board[14] = Em & board[15] = Em &
+    board[16] = End & board[0] = Start &
+    pos = 0;
+DEFINE
+    win := pos = 16;
+    lose := ! win & turn = 5;
+
+ASSIGN
+    next(turn) := case
+        turn = 5 | win        : 5;
+        board[next(pos)] = Em : turn + 1;
+        TRUE                  : turn;
+    esac;
+
+    next(pos) := case
+        turn = 5              : pos;
+        TRUE                  : min(pos + dice, 16);
+    esac;
+
+TRANS dice != next(dice);
+
+LTLSPEC
+    ! F win;
+
+LTLSPEC
+    ! F lose;
+
+LTLSPEC
+    !(G (board[pos] != Em) & F (win));

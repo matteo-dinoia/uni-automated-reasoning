@@ -13,7 +13,7 @@
 (define-const cost-norm Int   (+ (* xa 10) (* xb 15) (* xc 20)))
 (define-const  cost-heavy Int (+ (* xa 21) (* xb 18) (* xc 15)))
 
-(maxmin cost-norm cost-heavy)
+(minmax cost-norm cost-heavy)
 (check-sat)
 (get-model)
 (get-value (cost-norm))

@@ -1,55 +1,33 @@
+MODULE rocks_evo(rocks, i, start_j, end_j)
+ASSIGN
+    next(rocks[i]) := case
+        start_j = i : EE;
+        end_j = i   : rocks[start_j];
+        TRUE        : rocks[i];
+    esac;
+
+
 MODULE main
 VAR
-    rock: array 0..6 of {Gr, Br, EE};
+    rocks: array 0..6 of {Gr, Br, EE};
     start_j: 0..6;
     end_j: 0..6;
+    r0 : rocks_evo(rocks, 0, start_j, end_j);
+    r1 : rocks_evo(rocks, 1, start_j, end_j);
+    r2 : rocks_evo(rocks, 2, start_j, end_j);
+    r3 : rocks_evo(rocks, 3, start_j, end_j);
+    r4 : rocks_evo(rocks, 4, start_j, end_j);
+    r5 : rocks_evo(rocks, 5, start_j, end_j);
+    r6 : rocks_evo(rocks, 6, start_j, end_j);
+
 INIT
-    rock[0] = Gr & rock[1] = Gr & rock[2] = Gr & rock[3] = EE & rock[4] = Br & rock[5] = Br & rock[6] = Br;
-DEFINE
-    final := rock[0] = Br & rock[1] = Br & rock[2] = Br & rock[3] = EE & rock[4] = Gr & rock[5] = Gr & rock[6] = Gr;
+    rocks[0] = Gr & rocks[1] = Gr & rocks[2] = Gr &
+    rocks[3] = EE &
+    rocks[4] = Br & rocks[5] = Br & rocks[6] = Br;
 INVAR
-    (start_j - end_j) in {2, 1, 0, -1, -2} & rock[end_j] = EE;
-ASSIGN
-    next(rock[0]) := case
-        start_j = 0: EE;
-        end_j = 0  : rock[start_j];
-        TRUE       : rock[0];
-    esac;
+    (start_j - end_j) in {2, 1, 0, -1, -2} & rocks[end_j] = EE;
+DEFINE
+    inverted := rocks[0] = Br & rocks[1] = Br & rocks[2] = Br & rocks[3] = EE & rocks[4] = Gr & rocks[5] = Gr & rocks[6] = Gr;
 
-    next(rock[1]) := case
-        start_j = 1: EE;
-        end_j = 1  : rock[start_j];
-        TRUE       : rock[1];
-    esac;
 
-    next(rock[2]) := case
-        start_j = 2: EE;
-        end_j = 2  : rock[start_j];
-        TRUE       : rock[2];
-    esac;
-
-    next(rock[3]) := case
-        start_j = 3: EE;
-        end_j = 3  : rock[start_j];
-        TRUE       : rock[3];
-    esac;
-
-    next(rock[4]) := case
-        start_j = 4: EE;
-        end_j = 4  : rock[start_j];
-        TRUE       : rock[4];
-    esac;
-
-    next(rock[5]) := case
-        start_j = 5: EE;
-        end_j = 5  : rock[start_j];
-        TRUE       : rock[5];
-    esac;
-
-    next(rock[6]) := case
-        start_j = 6: EE;
-        end_j = 6  : rock[start_j];
-        TRUE       : rock[6];
-    esac;
-
-LTLSPEC ! F final;
+LTLSPEC ! F inverted;

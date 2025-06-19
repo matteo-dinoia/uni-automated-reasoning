@@ -1,0 +1,16 @@
+(set-option :produce-models true)
+(declare-const A Int)
+(declare-const B Int)
+(declare-const C Int)
+(declare-const D Int)
+(declare-const E Int)
+(declare-const F Int)
+(declare-const G Int)
+
+(assert (not (or (= A B) (= C B) (= C E) (= C D) (= D E) (= E F) (= D F) (= D G))))
+(assert (and (> A 0) (> B 0) (> C 0) (> D 0) (> E 0) (> F 0) (> G 0)))
+
+(minmax A B C D E F G)
+(check-sat)
+(get-objectives)
+(get-model)

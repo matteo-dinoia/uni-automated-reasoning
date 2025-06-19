@@ -1,0 +1,59 @@
+MODULE main
+VAR
+    a: 0..100;
+    b: 0..100;
+    res: 0..100;
+    pc: {WHILE, IF, INSIDE_IF, INSIDE_WHILE, TERMINATED};
+FROZENVAR
+    a_init: 0..10;
+    b_init: 0..100;
+    m: 1..100;
+ASSIGN
+    init(pc) := WHILE;
+    init(a) := a_init mod m;
+    init(b) := b_init;
+    init(res) := 1;
+
+    next(pc) := case
+        pc = WHILE        & b > 0             : IF;
+        pc = WHILE                            : TERMINATED;
+        pc = IF           & b mod 2 = 1       : INSIDE_IF;
+        pc = IF                               : INSIDE_WHILE;
+        pc = INSIDE_IF                        : INSIDE_WHILE;
+        pc = INSIDE_WHILE                     : WHILE;
+        TRUE                                  : TERMINATED;
+    esac;
+
+    next(a) := case
+        pc = INSIDE_WHILE          : (a * a) mod m;
+        TRUE                       : a;
+    esac;
+
+    next(b) := case
+        pc = INSIDE_WHILE          : b / 2;
+        TRUE                       : b;
+    esac;
+
+    next(res) := case
+        pc = INSIDE_IF             : (res * a) mod m;
+        TRUE                       : res;
+    esac;
+
+-- All these four property are true
+LTLSPEC F (pc = TERMINATED);
+LTLSPEC (a_init > 0 & b_init = 0) -> F (pc = TERMINATED & res = 1);
+LTLSPEC (b_init = 1)              -> F (pc = TERMINATED & res = a_init mod m);
+LTLSPEC (b_init = 3)              -> F (pc = TERMINATED & res = (a_init * a_init * a_init) mod m);
+
+-- This return a counter example that is the path to get a res = 20
+-- It has as starting condition a = 7 and b = 71 m = 31 which is correct
+-- as 7^ 71 mod 31 = 20
+LTLSPEC ! F (pc = TERMINATED & res = 20);
+
+
+-- ADDITIONAL QUESTION
+-- The formula (F[0, 2] (a | b)) check if it reachable
+-- from the current state and time,
+-- in a time between 0 and 2 time unit (T <= T' <= T + 2),
+-- a state where a or b holds (meaning at least one of the two holds).
+

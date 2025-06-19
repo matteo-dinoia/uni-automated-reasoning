@@ -1,0 +1,29 @@
+@TIME_DOMAIN continuous
+
+MODULE main
+VAR
+    dt: clock;
+    state: {ON, OFF};
+    temp: real;
+FROZENVAR
+    max_dt: real;
+INIT
+    max_dt > 0 &
+    temp >= 18 - max_dt &
+    temp <= 18 + max_dt &
+    dt = 0 &
+    (temp < 18 <-> state = ON);
+
+TRANS   next(dt) = dt;
+TRANS   temp < 18 <-> next(state) = ON;
+TRANS
+    (state = ON -> next(temp) = temp + dt) &
+    (state = ON -> next(temp) = temp + dt);
+
+
+INVAR   TRUE -> dt < max_dt;
+
+DEFINE   goal := temp >= 18 - max_dt &
+                        temp <= 18 + 2* max_dt;
+
+LTLSPEC   G (goal)
